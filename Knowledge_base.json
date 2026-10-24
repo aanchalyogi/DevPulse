@@ -1,0 +1,83 @@
+
+[
+  {
+    "status": 400,
+    "title": "Bad Request",
+    "causes": "The request contains invalid data, malformed JSON, missing required fields, or incorrect parameters.",
+    "steps": [
+      "Check that the request body contains valid JSON.",
+      "Verify required fields and parameter names.",
+      "Check the API documentation for the expected request format."
+    ]
+  },
+  {
+    "status": 401,
+    "title": "Unauthorized",
+    "causes": "Authentication credentials are missing, invalid, or expired.",
+    "steps": [
+      "Check whether the API requires an API key or access token.",
+      "Verify the Authorization header format.",
+      "Confirm that the credentials are valid and have not expired."
+    ]
+  },
+  {
+    "status": 403,
+    "title": "Forbidden",
+    "causes": "The server understood the request but refuses access because the user or credentials lack permission.",
+    "steps": [
+      "Check account permissions and access policies.",
+      "Verify that the API key has the required permissions.",
+      "Check whether the endpoint requires a particular subscription or role."
+    ]
+  },
+  {
+    "status": 404,
+    "title": "Not Found",
+    "causes": "The requested endpoint or resource does not exist at the specified URL.",
+    "steps": [
+      "Check the URL path for spelling mistakes.",
+      "Verify the resource ID exists.",
+      "Confirm the endpoint and HTTP method in the API documentation."
+    ]
+  },
+  {
+    "status": 429,
+    "title": "Too Many Requests",
+    "causes": "The client has exceeded the API rate limit or request quota.",
+    "steps": [
+      "Check the API rate-limit and quota policies.",
+      "Wait before retrying.",
+      "Use exponential backoff and respect the Retry-After header when provided."
+    ]
+  },
+  {
+    "status": 500,
+    "title": "Internal Server Error",
+    "causes": "The server encountered an unexpected condition while processing the request.",
+    "steps": [
+      "Check the response body for additional error details.",
+      "Retry after a short delay if appropriate.",
+      "If you manage the API, inspect server logs and exception traces."
+    ]
+  },
+  {
+    "status": 502,
+    "title": "Bad Gateway",
+    "causes": "A gateway or proxy received an invalid response from an upstream server.",
+    "steps": [
+      "Check whether the upstream API service is available.",
+      "Retry after a short delay.",
+      "If you manage the infrastructure, inspect gateway and upstream server logs."
+    ]
+  },
+  {
+    "status": 503,
+    "title": "Service Unavailable",
+    "causes": "The server is temporarily unavailable, overloaded, or undergoing maintenance.",
+    "steps": [
+      "Check the API provider's service status.",
+      "Retry after a short delay.",
+      "Use backoff between retries instead of sending repeated requests."
+    ]
+  }
+]

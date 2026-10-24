@@ -1,0 +1,240 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevPulse | API Testing Workbench</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>DevPulse ⚡</h1>
+            <p>AI-powered API testing and debugging workbench</p>
+        </header>
+
+        <section class="panel" id="response-section">
+            <h2>Send an API Request</h2>
+
+            <form method="POST">
+                <label for="method">HTTP Method</label>
+                <select id="method" name="method">
+                    <option>GET</option>
+                    <option>POST</option>
+                    <option>PUT</option>
+                    <option>DELETE</option>
+                </select>
+
+                <label for="url">Request URL</label>
+                <input
+                    type="url"
+                    id="url"
+                    name="url"
+                    placeholder="https://jsonplaceholder.typicode.com/users/1"
+                    required
+                >
+                
+<label for="expected_status">Expected Status Code (Optional)</label>
+<input
+    type="number"
+    id="expected_status"
+    name="expected_status"
+    placeholder="e.g. 200"
+    min="100"
+    max="599"
+>
+
+<label for="max_response_time">Maximum Response Time (ms, Optional)</label>
+<input
+    type="number"
+    id="max_response_time"
+    name="max_response_time"
+    placeholder="e.g. 1000"
+    min="1"
+>
+
+       
+      <label for="required_field">Required Response Field (Optional)</label>
+<input
+    type="text"
+    id="required_field"
+    name="required_field"
+    placeholder="e.g. name"
+>  
+<label for="headers">Request Headers (JSON)</label>
+<textarea
+    id="headers"
+    name="headers"
+    rows="4"
+    placeholder='{"Content-Type": "application/json"}'
+></textarea>
+
+<label for="body">Request Body (JSON)</label>
+<textarea
+    id="body"
+    name="body"
+    rows="6"
+    placeholder='{"name": "Aanchal", "email": "test@example.com"}'
+></textarea>
+
+<button type="submit">Send Request</button>
+
+            </form>
+        </section>
+
+        {% if error %}
+        <section class="panel" id="response-section">
+            <h2>Request Error</h2>
+            <p>{{ error }}</p>
+        </section>
+        {% endif %}
+
+        {% if response_data %}
+        
+        <section class="panel" id="response-section">
+            <h2>Response</h2>
+            <p>Status Code: {{ response_data.status }}</p>
+            <p>Response Time: {{ response_data.time }} ms</p>
+            
+<h3>Response Body</h3>
+<pre id="response-body">{{ response_data.body }}</pre>
+{% if response_data.test_passed is not none %}
+    <div class="panel">
+        <h3>API Test Assertion</h3>
+
+        <p>
+            Expected Status: {{ response_data.expected_status }}
+        </p>
+
+        <p>
+            Actual Status: {{ response_data.status }}
+        </p>
+
+        {% if response_data.test_passed %}
+            <p>✅ Test Passed</p>
+        {% else %}
+            <p>❌ Test Failed</p>
+        {% endif %}
+    </div>
+{% endif %}
+
+{% if response_data.time_test_passed is not none %}
+    <div class="panel">
+        <h3>Response Time Assertion</h3>
+        <p>Maximum Allowed: {{ response_data.max_response_time }} ms</p>
+        <p>Actual Response Time: {{ response_data.time }} ms</p>
+        {% if response_data.time_test_passed %}
+            <p>✅ Response Time Test Passed</p>
+        {% else %}
+            <p>❌ Response Time Test Failed</p>
+        {% endif %}
+    </div>
+{% endif %}
+
+{% if response_data.field_test_passed is not none %}
+    <div class="panel">
+        <h3>Required Field Assertion</h3>
+        <p>Required Field: {{ response_data.required_field }}</p>
+        {% if response_data.field_test_passed %}
+            <p>✅ Required Field Test Passed</p>
+        {% else %}
+            <p>❌ Required Field Test Failed</p>
+        {% endif %}
+    </div>
+{% endif %}
+
+{% if response_data %}
+    {% set checks = [] %}
+    {% if response_data.test_passed is not none %}
+        {% set _ = checks.append(response_data.test_passed) %}
+    {% endif %}
+    {% if response_data.time_test_passed is not none %}
+        {% set _ = checks.append(response_data.time_test_passed) %}
+    {% endif %}
+    {% if response_data.field_test_passed is not none %}
+        {% set _ = checks.append(response_data.field_test_passed) %}
+    {% endif %}
+
+    <div class="panel">
+        <h3>Overall Test Result</h3>
+        {% if checks|length == 0 %}
+            <p>No assertions configured.</p>
+        {% elif false in checks %}
+            <p>❌ SOME TESTS FAILED</p>
+        {% else %}
+            <p>✅ ALL TESTS PASSED</p>
+        {% endif %}
+    </div>
+{% endif %}
+
+<button
+    type="button"
+    id="explain-button"
+    data-status="{{ response_data.status }}"
+    data-method="{{ request.form.get('method', 'GET') }}"
+    data-url="{{ request.form.get('url', '') }}"
+>
+    Explain with AI
+</button>
+
+<div id="ai-result" class="panel" hidden>
+    <h3>AI Debugging Analysis</h3>
+    <p id="ai-explanation"></p>
+</div>
+
+            
+        </section>
+        {% endif %}
+    </div>
+
+    
+<section class="panel">
+    <div class="history-header">
+    <h2>Request History</h2>
+    <form action="/clear-history" method="POST">
+        <button type="submit" class="clear-history-button">
+            Clear History
+        </button>
+    </form>
+</div>
+
+    {% if history %}
+        {% for item in history|reverse %}
+           
+
+<div class="history-item" data-history-item>
+    <h4>
+        {{ item.method }}
+        <span>Status: {{ item.status }}</span>
+    </h4>
+
+    <p class="history-url">{{ item.url }}</p>
+
+    <p>Response Time: {{ item.time }} ms</p>
+
+    <button
+        type="button"
+        class="rerun-button"
+        data-method="{{ item.method }}"
+        data-url="{{ item.url }}"
+        data-headers='{{ item.headers | tojson }}'
+        data-body='{{ (item.body or "") | tojson }}'
+    >
+        Re-run Request
+    </button>
+</div>
+
+
+        {% endfor %}
+        <button type="button" id="toggle-history-button">
+    Show More
+</button>
+    {% else %}
+        <p>No requests yet. Send an API request to see it here.</p>
+    {% endif %}
+</section>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
